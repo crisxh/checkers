@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkers</title>
+</head>
+<body>
+    <style>
+
+        :root{
+            --pieceSize:45px;
+
+        }
+        
+
+        body{
+            display:flex;
+            justify-content: center;
+            align-items: center;
+            background-image:url("pexels-fwstudio-172277.jpg" );
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        #checkerBoard{
+            display:flex;
+            min-width: 400px;
+            max-width:400px;
+            flex-wrap:wrap;
+           /* outline:solid rgb(80, 30, 1);*/
+            border:outset rgb(189, 89, 42) 10px;
+            box-shadow:5px 5px 10px;
+            border-radius:5%;
+            
+        }
+        table{
+            border:solid 2px black;
+        }
+
+        td{
+            background-color:yellow;
+            border:2px solid black;
+        
+        }
+
+        tr{
+            border:5px dashed blue;
+            background-color:green;
+        }
+
+        .move{
+            display:flex;
+            justify-content: center;
+            align-items: center;
+            background-color:lightcoral;
+            height: 50px;
+            width: 50px;
+            /*border:2px solid black;*/
+            /*outline:blue solid;*/
+
+        }
+        
+        .noMove{
+            height: 50px;
+            width: 50px;
+            background-color:white;
+            /*border:2px solid blue;*/
+            /*outline:blue solid;*/
+
+        }
+
+        .blackPiece{
+            height: var(--pieceSize);
+            width: var(--pieceSize);
+            background-color: rgb(63, 61, 61);
+            border-radius: 50%;
+            box-shadow:5px 5px 5px ;
+        }
+        .redPiece{
+            height: var(--pieceSize);
+            width: var(--pieceSize);
+            background-color: red;
+            border-radius: 50%;
+            box-shadow:5px 5px 5px;
+        }
+
+        .piece{
+          
+        }
+        .captureContainer{
+            display:flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /*border:solid;*/
+            height: 400px;
+            width: 400px;
+            margin: 20px;
+            background-color: rgba(165, 42, 42, 0.452);
+            text-shadow:5px 5px 10px white;
+            border-radius:5%;
+            box-shadow:5px 5px 10px black;
+        }
+        .captureBox{
+            display:flex;
+            justify-content: center;
+            justify-content: space-around;
+            flex-wrap:wrap;
+            height: 150px;
+            width: 150px;
+            /*margin:20px;*/
+            /*border:solid;*/
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.527);
+            border-radius:5%;
+            /*box-shadow:5px 5px 10px black;*/
+            border:inset black;
+        }
+       .captureH{
+            display:flex;
+            justify-content: center;
+            width: 100%;
+            height: 10%;
+
+        } 
+    </style>
+
+
+
+  <!--   <div id="dragThis" draggable="true" >🔴</div>
+    <div id="dropBox" >droppable</div> -->
+    
+    <div id="captureContainerRed" class="captureContainer">
+        <h1 class="captureH">Capture Red</h1>
+        <div id="captureRed" class="captureBox"></div>
+    </div>
+   <div class="captureH" id="checkerBoard">
+
+   </div>
+<div id="captureContainerBlack" class="captureContainer">
+    <h1>Capture Black</h1>
+    <div id="captureBlack" class="captureBox"></div>
+</div>
+    
+    <!-- <div id="acknowledgements">Photo by FWStudio from Pexels</div> -->
+    
+    <script>
+        move=document.createElement("div");
+        noMove=document.createElement("div");
+        br=document.createElement("br");
+        move.className="move";
+        noMove.className="noMove";
+        board=document.querySelector("#checkerBoard");
+        captureBox=document.querySelectorAll(".captureBox");
+
+        //let checkEmoji=document.getElementById("dragThis");
+        //body.append(move);
+
+        
+       
+        
+/* generates the first 2 rows of the checker board by alternating move and noMove squares*/
+        function checkerBoard(){
+
+            for(let i=0;i<4;i++){
+        
+            board.append(move.cloneNode(true));
+            board.append(noMove.cloneNode(true));
+          }
+          
+          for(let i=0;i<4;i++){
+            board.append(noMove.cloneNode(true));
+            board.append(move.cloneNode(true));
+            }
+        }
+
+        /*generates full board by multiplying 2 rows by 4 to give 8 */
+        for(let i=0;i<4;i++){
+                checkerBoard();
+            }
+
+       /*below will be to make .move squares droppable*/     
+
+      
+       let moveable=document.querySelectorAll(".move");
+        console.log(moveable);
+
+        moveable.forEach(function(moveSquare){
+            moveSquare.addEventListener("dragenter",dragEnter);
+            moveSquare.addEventListener("dragleave",dragLeave);
+            moveSquare.addEventListener("dragover",dragOver);
+            moveSquare.addEventListener("drop",dragDrop);
+        })
+
+        captureBox.forEach(function(moveSquare){
+            moveSquare.addEventListener("dragenter",dragEnter);
+            moveSquare.addEventListener("dragleave",dragLeave);
+            moveSquare.addEventListener("dragover",dragOver);
+            moveSquare.addEventListener("drop",dragDrop);
+        })
+
+       //checkEmoji.addEventListener("dragstart",dragStart);
+
+        function dragStart(ev){
+            
+            ev.dataTransfer.setData("text",ev.target.id);
+            setTimeout(()=> (this.style.visibility="hidden"),0);
+        }
+
+        function dragEnd(ev){
+            this.style.visibility="visible";
+        }
+
+        function dragOver(ev){
+            
+            ev.preventDefault();
+            console.log("over");
+        }
+
+        function dragEnter(){
+            console.log("enter");
+            //this.style.border="2px dashed";
+        }
+
+        function dragLeave(){
+            console.log("leave");
+        }
+
+        function dragDrop(ev){
+            ev.preventDefault();
+            var data=ev.dataTransfer.getData("text");
+            ev.target.append(document.getElementById(data));
+            console.log("drop");
+            this.style.visibility="visible";
+            //ev.stopPropagation();
+            
+
+        }
+
+      
+      
+      /*adding checker pieces*/
+
+      function blackPieces(){
+        for(let i=0;i<8;i++){
+        let blackPiece=document.createElement("div");
+        blackPiece.className="blackPiece piece";
+        blackPiece.id="blackPiece"+[i];
+       // blackPiece.innerHTML="hi";
+          moveable[i].append(blackPiece);
+
+        let blackPieces=document.querySelectorAll(".blackPiece");
+        blackPieces.forEach(function(p){
+            p.draggable="true";
+            p.addEventListener("dragstart",dragStart);
+            p.addEventListener("dragend",dragEnd);
+           
+        })
+
+        
+      }
+
+      /* for (let i=0;i<blackPieces.length;i++){
+          blackPieces[i].id="blackPiece";
+      }; */
+        
+      
+    }
+
+    
+
+    blackPieces();
+
+      function redPieces(){
+        for(let i=24;i<32;i++){
+        let redPiece=document.createElement("div");
+        redPiece.className="redPiece piece";
+        redPiece.id="blackPiece"+[i];
+        //redPiece.innerHTML="hi";
+          moveable[i].append(redPiece);
+
+        let redPieces=document.querySelectorAll(".redPiece");
+        redPieces.forEach(function(p){
+            p.draggable="true";
+            p.addEventListener("dragstart",dragStart);
+            p.addEventListener("dragend",dragEnd);
+      })
+
+      }
+    }
+redPieces();
+      
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+       /*let droppable=document.querySelectorAll(".move");
+      
+
+       droppable.forEach(function(square){
+           square.addEventListener("click",function(){
+           
+           
+           if(this.style.backgroundColor=="black"){
+            this.addEventListener("click",function(){
+                    this.style.backgroundColor="green";
+                })
+            }else if(this.style.backgroundColor="green"){
+                this.addEventListener("click",function(){
+                    this.style.backgroundColor="black";
+                });
+            }
+            
+            //window.alert("you clicked a moveable square!");
+               
+           })
+       })
+
+   
+
+       console.log(droppable);*/
+    </script>
+</body>
+</html>
